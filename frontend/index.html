@@ -1,240 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ZakaTech - Login</title>
-    <meta name="description" content="Login to ZakaTech - Intelligent Zakat Analytics Platform">
+    <meta
+      name="description"
+      content="Login to ZakaTech - Intelligent Zakat Analytics Platform"
+    />
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body class="landing-page">
+  <body class="landing-page">
     <div class="login-container">
-        <!-- Logo -->
-        <div class="login-logo">
-            <h1>Zaka<span>Tech</span></h1>
-            <p>Predictive Zakat Analytics</p>
+      <!-- Logo -->
+      <div class="login-logo">
+        <h1>Zaka<span>Tech</span></h1>
+        <p>Predictive Zakat Analytics</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="login-card">
+        <!-- Tab Switcher -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Login</button>
+          <button class="auth-tab" data-tab="register">Register</button>
         </div>
 
-        <!-- Login Card -->
-        <div class="login-card">
-            <!-- Tab Switcher -->
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Login</button>
-                <button class="auth-tab" data-tab="register">Register</button>
-            </div>
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form">
+          <div class="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              id="loginEmail"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Login</button>
+          <div class="auth-error hidden" id="loginError"></div>
+        </form>
 
-            <!-- Login Form -->
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required placeholder="Enter your email">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required placeholder="Enter your password">
-                </div>
-                <button type="submit" class="btn-primary">Login</button>
-                <div class="auth-error hidden" id="loginError"></div>
-            </form>
+        <!-- Register Form -->
+        <form id="registerForm" class="auth-form hidden">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              id="registerName"
+              required
+              placeholder="Enter your full name"
+            />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              id="registerEmail"
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              id="registerPassword"
+              required
+              placeholder="Min. 6 characters"
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              id="registerConfirm"
+              required
+              placeholder="Confirm password"
+            />
+          </div>
+          <button type="submit" class="btn-primary">Create Account</button>
+          <div class="auth-error hidden" id="registerError"></div>
+          <div class="auth-success hidden" id="registerSuccess"></div>
+        </form>
 
-            <!-- Register Form -->
-            <form id="registerForm" class="auth-form hidden">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="registerName" required placeholder="Enter your full name">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="registerEmail" required placeholder="Enter your email">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="registerPassword" required placeholder="Min. 6 characters" minlength="6">
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" id="registerConfirm" required placeholder="Confirm password">
-                </div>
-                <button type="submit" class="btn-primary">Create Account</button>
-                <div class="auth-error hidden" id="registerError"></div>
-                <div class="auth-success hidden" id="registerSuccess"></div>
-            </form>
-
-            <!-- Demo Accounts -->
-            <div class="demo-accounts">
-                <p>Demo Accounts:</p>
-                <div class="demo-list">
-                    <span class="demo-badge user" onclick="fillDemo('user@zakatech.com', 'user123')">👤 User</span>
-                    <span class="demo-badge admin" onclick="fillDemo('admin@zakatech.com', 'admin123')">🔑 Admin</span>
-                </div>
-            </div>
+        <!-- Demo Accounts -->
+        <div class="demo-accounts">
+          <p>Demo Accounts:</p>
+          <div class="demo-list">
+            <span
+              class="demo-badge user"
+              onclick="fillDemo('user@zakatech.com', 'user123')"
+              >👤 User</span
+            >
+            <span
+              class="demo-badge admin"
+              onclick="fillDemo('admin@zakatech.com', 'admin123')"
+              >🔑 Admin</span
+            >
+          </div>
         </div>
+      </div>
 
-        <!-- Footer -->
-        <footer class="login-footer">
-            <p>Powered by Machine Learning • Random Forest Regression</p>
-        </footer>
+      <!-- Footer -->
+      <footer class="login-footer">
+        <p>Powered by Machine Learning • Random Forest Regression</p>
+      </footer>
     </div>
 
     <!-- Background Animation -->
     <div class="bg-gradient-animation"></div>
 
     <script>
-        const API_BASE = 'http://localhost:5000/api';
+      const API_BASE = "/api";
 
-        // Check if already logged in
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch(`${API_BASE}/auth/me`, { credentials: 'include' });
-                const data = await response.json();
+      // Check if already logged in
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const response = await fetch(`${API_BASE}/auth/me`, {
+            credentials: "include",
+          });
+          const data = await response.json();
 
-                if (data.logged_in) {
-                    redirectUser(data.user.role);
-                }
-            } catch (e) {
-                console.log('Not logged in');
-            }
+          if (data.logged_in) {
+            redirectUser(data.user.role);
+          }
+        } catch (e) {
+          console.log("Not logged in");
+        }
 
-            setupTabs();
-            setupForms();
+        setupTabs();
+        setupForms();
+      });
+
+      function setupTabs() {
+        document.querySelectorAll(".auth-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const tabName = tab.dataset.tab;
+
+            // Update tabs
+            document
+              .querySelectorAll(".auth-tab")
+              .forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // Show/hide forms
+            document
+              .getElementById("loginForm")
+              .classList.toggle("hidden", tabName !== "login");
+            document
+              .getElementById("registerForm")
+              .classList.toggle("hidden", tabName !== "register");
+
+            // Clear errors
+            document
+              .querySelectorAll(".auth-error, .auth-success")
+              .forEach((el) => el.classList.add("hidden"));
+          });
         });
+      }
 
-        function setupTabs() {
-            document.querySelectorAll('.auth-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabName = tab.dataset.tab;
+      function setupForms() {
+        // Login form
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById("loginError");
+            errorDiv.classList.add("hidden");
 
-                    // Update tabs
-                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
+            const btn = e.target.querySelector("button");
+            btn.disabled = true;
+            btn.textContent = "Logging in...";
 
-                    // Show/hide forms
-                    document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
-                    document.getElementById('registerForm').classList.toggle('hidden', tabName !== 'register');
+            try {
+              const response = await fetch(`${API_BASE}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  email: document.getElementById("loginEmail").value,
+                  password: document.getElementById("loginPassword").value,
+                }),
+              });
 
-                    // Clear errors
-                    document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.classList.add('hidden'));
-                });
-            });
-        }
+              const data = await response.json();
 
-        function setupForms() {
-            // Login form
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const errorDiv = document.getElementById('loginError');
-                errorDiv.classList.add('hidden');
-
-                const btn = e.target.querySelector('button');
-                btn.disabled = true;
-                btn.textContent = 'Logging in...';
-
-                try {
-                    const response = await fetch(`${API_BASE}/auth/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            email: document.getElementById('loginEmail').value,
-                            password: document.getElementById('loginPassword').value
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.status === 'success') {
-                        redirectUser(data.user.role);
-                    } else {
-                        errorDiv.textContent = data.error || 'Login failed';
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    errorDiv.textContent = 'Connection error. Please try again.';
-                    errorDiv.classList.remove('hidden');
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = 'Login';
-                }
-            });
-
-            // Register form
-            document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const errorDiv = document.getElementById('registerError');
-                const successDiv = document.getElementById('registerSuccess');
-                errorDiv.classList.add('hidden');
-                successDiv.classList.add('hidden');
-
-                const password = document.getElementById('registerPassword').value;
-                const confirm = document.getElementById('registerConfirm').value;
-
-                if (password !== confirm) {
-                    errorDiv.textContent = 'Passwords do not match';
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                const btn = e.target.querySelector('button');
-                btn.disabled = true;
-                btn.textContent = 'Creating account...';
-
-                try {
-                    const response = await fetch(`${API_BASE}/auth/register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            fullName: document.getElementById('registerName').value,
-                            email: document.getElementById('registerEmail').value,
-                            password: password
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.status === 'success') {
-                        successDiv.textContent = data.message;
-                        successDiv.classList.remove('hidden');
-
-                        // Switch to login tab after 2 seconds
-                        setTimeout(() => {
-                            document.querySelector('[data-tab="login"]').click();
-                            document.getElementById('loginEmail').value = document.getElementById('registerEmail').value;
-                        }, 2000);
-                    } else {
-                        errorDiv.textContent = data.error || 'Registration failed';
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    errorDiv.textContent = 'Connection error. Please try again.';
-                    errorDiv.classList.remove('hidden');
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = 'Create Account';
-                }
-            });
-        }
-
-        function fillDemo(email, password) {
-            document.getElementById('loginEmail').value = email;
-            document.getElementById('loginPassword').value = password;
-            document.querySelector('[data-tab="login"]').click();
-        }
-
-        function redirectUser(role) {
-            if (role === 'admin') {
-                window.location.href = '/admin';
-            } else {
-                window.location.href = '/user';
+              if (response.ok && data.status === "success") {
+                redirectUser(data.user.role);
+              } else {
+                errorDiv.textContent = data.error || "Login failed";
+                errorDiv.classList.remove("hidden");
+              }
+            } catch (error) {
+              errorDiv.textContent = "Connection error. Please try again.";
+              errorDiv.classList.remove("hidden");
+            } finally {
+              btn.disabled = false;
+              btn.textContent = "Login";
             }
-        }
-    </script>
-</body>
+          });
 
+        // Register form
+        document
+          .getElementById("registerForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const errorDiv = document.getElementById("registerError");
+            const successDiv = document.getElementById("registerSuccess");
+            errorDiv.classList.add("hidden");
+            successDiv.classList.add("hidden");
+
+            const password = document.getElementById("registerPassword").value;
+            const confirm = document.getElementById("registerConfirm").value;
+
+            if (password !== confirm) {
+              errorDiv.textContent = "Passwords do not match";
+              errorDiv.classList.remove("hidden");
+              return;
+            }
+
+            const btn = e.target.querySelector("button");
+            btn.disabled = true;
+            btn.textContent = "Creating account...";
+
+            try {
+              const response = await fetch(`${API_BASE}/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  fullName: document.getElementById("registerName").value,
+                  email: document.getElementById("registerEmail").value,
+                  password: password,
+                }),
+              });
+
+              const data = await response.json();
+
+              if (response.ok && data.status === "success") {
+                successDiv.textContent = data.message;
+                successDiv.classList.remove("hidden");
+
+                // Switch to login tab after 2 seconds
+                setTimeout(() => {
+                  document.querySelector('[data-tab="login"]').click();
+                  document.getElementById("loginEmail").value =
+                    document.getElementById("registerEmail").value;
+                }, 2000);
+              } else {
+                errorDiv.textContent = data.error || "Registration failed";
+                errorDiv.classList.remove("hidden");
+              }
+            } catch (error) {
+              errorDiv.textContent = "Connection error. Please try again.";
+              errorDiv.classList.remove("hidden");
+            } finally {
+              btn.disabled = false;
+              btn.textContent = "Create Account";
+            }
+          });
+      }
+
+      function fillDemo(email, password) {
+        document.getElementById("loginEmail").value = email;
+        document.getElementById("loginPassword").value = password;
+        document.querySelector('[data-tab="login"]').click();
+      }
+
+      function redirectUser(role) {
+        if (role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/user";
+        }
+      }
+    </script>
+  </body>
 </html>

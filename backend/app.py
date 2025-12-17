@@ -73,48 +73,52 @@ def admin_dashboard():
 @app.route('/api/auth/register', methods=['POST'])
 def register():
     """Register a new user."""
-    data = request.json
-    email = data.get('email', '').strip().lower()
-    password = data.get('password', '')
-    full_name = data.get('fullName', '').strip()
-    
-    if not email or not password or not full_name:
-        return jsonify({"error": "All fields are required"}), 400
-    
-    if len(password) < 6:
-        return jsonify({"error": "Password must be at least 6 characters"}), 400
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Check if email exists
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-    if cursor.fetchone():
+    try:
+        data = request.json
+        email = data.get('email', '').strip().lower()
+        password = data.get('password', '')
+        full_name = data.get('fullName', '').strip()
+        
+        if not email or not password or not full_name:
+            return jsonify({"error": "All fields are required"}), 400
+        
+        if len(password) < 6:
+            return jsonify({"error": "Password must be at least 6 characters"}), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if email exists
+        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"error": "Email already registered"}), 400
+        
+        # Create user
+        password_hash = generate_password_hash(password)
+        cursor.execute('''
+            INSERT INTO users (email, password_hash, full_name, role)
+            VALUES (?, ?, ?, 'user')
+        ''', (email, password_hash, full_name))
+        
+        user_id = cursor.lastrowid
+        
+        # Create empty profile
+        cursor.execute('''
+            INSERT INTO user_profiles (user_id, age, income, savings)
+            VALUES (?, 30, 0, 0)
+        ''', (user_id,))
+        
+        conn.commit()
         conn.close()
-        return jsonify({"error": "Email already registered"}), 400
-    
-    # Create user
-    password_hash = generate_password_hash(password)
-    cursor.execute('''
-        INSERT INTO users (email, password_hash, full_name, role)
-        VALUES (?, ?, ?, 'user')
-    ''', (email, password_hash, full_name))
-    
-    user_id = cursor.lastrowid
-    
-    # Create empty profile
-    cursor.execute('''
-        INSERT INTO user_profiles (user_id, age, income, savings)
-        VALUES (?, 30, 0, 0)
-    ''', (user_id,))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({
-        "message": "Registration successful! Please login.",
-        "status": "success"
-    })
+        
+        return jsonify({
+            "message": "Registration successful! Please login.",
+            "status": "success"
+        })
+    except Exception as e: # <--- CATCH THE ERROR HERE
+        print(f"❌ REGISTER ERROR: {e}") # This prints to your VS Code Terminal
+        return jsonify({"error": str(e)}), 500 # Returns the specific error to the frontend
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():

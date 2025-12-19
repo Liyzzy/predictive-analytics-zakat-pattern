@@ -24,3 +24,6 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+backend/zakat_database.db

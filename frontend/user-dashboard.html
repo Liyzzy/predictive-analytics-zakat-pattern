@@ -1,253 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Donor Portal - ZakaTech</title>
-    <meta name="description" content="Manage your Zakat contributions with intelligent predictions and Haul tracking">
+    <meta
+      name="description"
+      content="Manage your Zakat contributions with intelligent predictions and Haul tracking"
+    />
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
     <div class="app-container">
-        <!-- Sidebar / Navigation -->
-        <nav class="sidebar">
-            <div class="logo">
-                <h2>Zaka<span>Tech</span></h2>
-                <p>Donor Portal</p>
+      <!-- Sidebar / Navigation -->
+      <nav class="sidebar">
+        <div class="logo">
+          <h2>Zaka<span>Tech</span></h2>
+          <p>Donor Portal</p>
+        </div>
+        <ul class="nav-links">
+          <li class="active"><a href="#profiling">Financial Profile</a></li>
+          <li><a href="#prediction">Zakat Prediction</a></li>
+          <li><a href="#haul">Haul Tracker</a></li>
+          <li><a href="#history">Contribution History</a></li>
+          <li class="nav-divider"></li>
+          <li><a href="#" class="nav-logout" id="logoutBtn">🚪 Logout</a></li>
+        </ul>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header>
+          <h1>Muzakki Portal</h1>
+          <p class="date-display" id="currentDate">loading...</p>
+        </header>
+
+        <!-- Nisab Status Banner -->
+        <section class="nisab-banner" id="nisabBanner">
+          <div class="nisab-content">
+            <div class="nisab-status" id="nisabStatus">
+              <span class="status-icon">⏳</span>
+              <span class="status-text"
+                >Enter your financial details to check Zakat eligibility</span
+              >
             </div>
-            <ul class="nav-links">
-                <li class="active"><a href="#profiling">Financial Profile</a></li>
-                <li><a href="#prediction">Zakat Prediction</a></li>
-                <li><a href="#haul">Haul Tracker</a></li>
-                <li><a href="#history">Contribution History</a></li>
-                <li class="nav-divider"></li>
-                <li><a href="#" class="nav-logout" id="logoutBtn">🚪 Logout</a></li>
-            </ul>
-        </nav>
+            <div class="nisab-threshold">
+              Current Nisab: <strong id="nisabValue">RM 22,000</strong>
+            </div>
+          </div>
+        </section>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <header>
-                <h1>Muzakki Portal</h1>
-                <p class="date-display" id="currentDate">loading...</p>
-            </header>
+        <!-- Financial Profiling Section -->
+        <section class="profile-section" id="profiling">
+          <div class="card">
+            <h2>📊 Financial Profiling</h2>
+            <p class="section-desc">
+              Enter your current financial information for Zakat assessment
+            </p>
 
-            <!-- Nisab Status Banner -->
-            <section class="nisab-banner" id="nisabBanner">
-                <div class="nisab-content">
-                    <div class="nisab-status" id="nisabStatus">
-                        <span class="status-icon">⏳</span>
-                        <span class="status-text">Enter your financial details to check Zakat eligibility</span>
-                    </div>
-                    <div class="nisab-threshold">
-                        Current Nisab: <strong id="nisabValue">RM 22,000</strong>
-                    </div>
+            <form id="profileForm" class="profile-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Monthly Income (RM)</label>
+                  <input
+                    type="number"
+                    id="income"
+                    required
+                    placeholder="e.g. 5000"
+                    min="0"
+                  />
                 </div>
-            </section>
-
-            <!-- Financial Profiling Section -->
-            <section class="profile-section" id="profiling">
-                <div class="card">
-                    <h2>📊 Financial Profiling</h2>
-                    <p class="section-desc">Enter your current financial information for Zakat assessment</p>
-
-                    <form id="profileForm" class="profile-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Monthly Income (RM)</label>
-                                <input type="number" id="income" required placeholder="e.g. 5000" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Age</label>
-                                <input type="number" id="age" required placeholder="e.g. 35" min="18" max="100">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>💵 Cash Savings (RM)</label>
-                                <input type="number" id="savings" required placeholder="e.g. 25000" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>🥇 Gold Assets Value (RM)</label>
-                                <input type="number" id="goldValue" required placeholder="e.g. 15000" min="0">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>📈 Investment Portfolios (RM)</label>
-                                <input type="number" id="investmentValue" required placeholder="e.g. 30000" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>👨‍👩‍👧‍👦 Family Size</label>
-                                <input type="number" id="familySize" required placeholder="e.g. 4" min="1" max="20">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Employment Status</label>
-                                <select id="employmentStatus">
-                                    <option value="0">Unemployed</option>
-                                    <option value="1" selected>Employed</option>
-                                    <option value="2">Self-Employed</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Contribution Consistency (0-100)</label>
-                                <input type="range" id="contributionScore" min="0" max="100" value="50"
-                                    oninput="this.nextElementSibling.value = this.value">
-                                <output>50</output>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn-primary">Check Eligibility & Calculate</button>
-                    </form>
+                <div class="form-group">
+                  <label>Age</label>
+                  <input
+                    type="number"
+                    id="age"
+                    required
+                    placeholder="e.g. 35"
+                    min="18"
+                    max="100"
+                  />
                 </div>
+              </div>
 
-                <!-- Wealth Summary Card -->
-                <div class="wealth-summary card" id="wealthSummary">
-                    <h3>💰 Total Zakatable Wealth</h3>
-                    <div class="wealth-amount" id="totalWealth">RM 0</div>
-                    <div class="wealth-breakdown">
-                        <div class="breakdown-item">
-                            <span>Savings</span>
-                            <span id="breakdownSavings">RM 0</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span>Gold</span>
-                            <span id="breakdownGold">RM 0</span>
-                        </div>
-                        <div class="breakdown-item">
-                            <span>Investments</span>
-                            <span id="breakdownInvestments">RM 0</span>
-                        </div>
-                    </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>💵 Cash Savings (RM)</label>
+                  <input
+                    type="number"
+                    id="savings"
+                    required
+                    placeholder="e.g. 25000"
+                    min="0"
+                  />
                 </div>
-            </section>
-
-            <!-- Prediction Section -->
-            <section class="prediction-section" id="prediction">
-                <div class="card prediction-card">
-                    <div class="prediction-content">
-                        <h2>🎯 Predictive Zakat Recommendation</h2>
-                        <p class="section-desc">AI-powered recommendation based on your financial profile and spending
-                            patterns</p>
-
-                        <div id="predictionPlaceholder" class="prediction-placeholder">
-                            <div class="placeholder-icon">🔮</div>
-                            <p>Complete your financial profile above to receive a personalized Zakat prediction</p>
-                        </div>
-
-                        <div id="predictionResult" class="prediction-result hidden">
-                            <div class="result-grid">
-                                <div class="result-card primary">
-                                    <h4>AI Recommended Amount</h4>
-                                    <p class="result-value" id="predictedAmount">RM 0</p>
-                                    <span class="result-badge">Based on ML Model</span>
-                                </div>
-                                <div class="result-card secondary">
-                                    <h4>Standard Calculation (2.5%)</h4>
-                                    <p class="result-value" id="standardAmount">RM 0</p>
-                                    <span class="result-badge">Traditional Method</span>
-                                </div>
-                            </div>
-                            <div class="prediction-note">
-                                <strong>Note:</strong> The AI recommendation considers your spending power, historical
-                                patterns, and financial stability beyond the standard 2.5% calculation.
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group">
+                  <label>🥇 Gold Assets Value (RM)</label>
+                  <input
+                    type="number"
+                    id="goldValue"
+                    required
+                    placeholder="e.g. 15000"
+                    min="0"
+                  />
                 </div>
-            </section>
+              </div>
 
-            <!-- Haul Tracker Section -->
-            <section class="haul-section" id="haul">
-                <div class="card">
-                    <h2>📅 Haul Tracker</h2>
-                    <p class="section-desc">Track the lunar year period for your Zakat obligation</p>
-
-                    <div class="haul-form">
-                        <div class="form-group">
-                            <label>Date Wealth Reached Nisab</label>
-                            <input type="date" id="haulStartDate">
-                            <button type="button" class="btn-secondary" id="checkHaulBtn">Check Haul Status</button>
-                        </div>
-                    </div>
-
-                    <div id="haulResult" class="haul-result hidden">
-                        <div class="haul-progress">
-                            <div class="progress-ring">
-                                <svg viewBox="0 0 100 100">
-                                    <circle class="progress-bg" cx="50" cy="50" r="45"></circle>
-                                    <circle class="progress-bar" cx="50" cy="50" r="45" id="haulProgressCircle">
-                                    </circle>
-                                </svg>
-                                <div class="progress-text">
-                                    <span class="progress-percent" id="haulPercent">0%</span>
-                                    <span class="progress-label">Complete</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="haul-details">
-                            <div class="haul-stat">
-                                <span class="stat-label">Days Elapsed</span>
-                                <span class="stat-value" id="daysElapsed">0</span>
-                            </div>
-                            <div class="haul-stat">
-                                <span class="stat-label">Days Remaining</span>
-                                <span class="stat-value" id="daysRemaining">354</span>
-                            </div>
-                            <div class="haul-stat">
-                                <span class="stat-label">Due Date</span>
-                                <span class="stat-value" id="dueDate">-</span>
-                            </div>
-                        </div>
-                        <div class="haul-message" id="haulMessage"></div>
-                    </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>📈 Investment Portfolios (RM)</label>
+                  <input
+                    type="number"
+                    id="investmentValue"
+                    required
+                    placeholder="e.g. 30000"
+                    min="0"
+                  />
                 </div>
-            </section>
-
-            <!-- Contribution History Section -->
-            <section class="history-section" id="history">
-                <div class="card">
-                    <h2>📜 Contribution History</h2>
-                    <p class="section-desc">Track your Zakat payments year-over-year</p>
-
-                    <div class="history-chart-container">
-                        <canvas id="historyChart"></canvas>
-                    </div>
-
-                    <div class="history-stats">
-                        <div class="stat-card mini">
-                            <h4>Total Contributed</h4>
-                            <p id="totalContributed">RM 6,150</p>
-                        </div>
-                        <div class="stat-card mini">
-                            <h4>Years Active</h4>
-                            <p id="yearsActive">4</p>
-                        </div>
-                        <div class="stat-card mini">
-                            <h4>Growth Rate</h4>
-                            <p id="growthRate">+15.2%</p>
-                        </div>
-                    </div>
+                <div class="form-group">
+                  <label>👨‍👩‍👧‍👦 Family Size</label>
+                  <input
+                    type="number"
+                    id="familySize"
+                    required
+                    placeholder="e.g. 4"
+                    min="1"
+                    max="20"
+                  />
                 </div>
-            </section>
-        </main>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Employment Status</label>
+                  <select id="employmentStatus">
+                    <option value="0">Unemployed</option>
+                    <option value="1" selected>Employed</option>
+                    <option value="2">Self-Employed</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Contribution Consistency (0-100)</label>
+                  <input
+                    type="range"
+                    id="contributionScore"
+                    min="0"
+                    max="100"
+                    value="50"
+                    oninput="this.nextElementSibling.value = this.value"
+                  />
+                  <output>50</output>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary">
+                Check Eligibility & Calculate
+              </button>
+            </form>
+          </div>
+
+          <!-- Wealth Summary Card -->
+          <div class="wealth-summary card" id="wealthSummary">
+            <h3>💰 Total Zakatable Wealth</h3>
+            <div class="wealth-amount" id="totalWealth">RM 0</div>
+            <div class="wealth-breakdown">
+              <div class="breakdown-item">
+                <span>Savings</span>
+                <span id="breakdownSavings">RM 0</span>
+              </div>
+              <div class="breakdown-item">
+                <span>Gold</span>
+                <span id="breakdownGold">RM 0</span>
+              </div>
+              <div class="breakdown-item">
+                <span>Investments</span>
+                <span id="breakdownInvestments">RM 0</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Prediction Section -->
+        <section class="prediction-section" id="prediction">
+          <div class="card prediction-card">
+            <div class="prediction-content">
+              <h2>🎯 Predictive Zakat Recommendation</h2>
+              <p class="section-desc">
+                AI-powered recommendation based on your financial profile and
+                spending patterns
+              </p>
+
+              <div id="predictionPlaceholder" class="prediction-placeholder">
+                <div class="placeholder-icon">🔮</div>
+                <p>
+                  Complete your financial profile above to receive a
+                  personalized Zakat prediction
+                </p>
+              </div>
+
+              <div id="predictionResult" class="prediction-result hidden">
+                <div class="result-grid">
+                  <div class="result-card primary">
+                    <h4>AI Recommended Amount</h4>
+                    <p class="result-value" id="predictedAmount">RM 0</p>
+                    <span class="result-badge">Based on ML Model</span>
+                  </div>
+                  <div class="result-card secondary">
+                    <h4>Standard Calculation (2.5%)</h4>
+                    <p class="result-value" id="standardAmount">RM 0</p>
+                    <span class="result-badge">Traditional Method</span>
+                  </div>
+                </div>
+                <div class="prediction-note">
+                  <strong>Note:</strong> The AI recommendation considers your
+                  spending power, historical patterns, and financial stability
+                  beyond the standard 2.5% calculation.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Haul Tracker Section -->
+        <section class="haul-section" id="haul">
+          <div class="card">
+            <h2>📅 Haul Tracker</h2>
+            <p class="section-desc">
+              Track the lunar year period for your Zakat obligation
+            </p>
+
+            <div class="haul-form">
+              <div class="form-group">
+                <label>Date Wealth Reached Nisab</label>
+                <input type="date" id="haulStartDate" />
+                <button type="button" class="btn-secondary" id="checkHaulBtn">
+                  Check Haul Status
+                </button>
+              </div>
+            </div>
+
+            <div id="haulResult" class="haul-result hidden">
+              <div class="haul-progress">
+                <div class="progress-ring">
+                  <svg viewBox="0 0 100 100">
+                    <circle class="progress-bg" cx="50" cy="50" r="45"></circle>
+                    <circle
+                      class="progress-bar"
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      id="haulProgressCircle"
+                    ></circle>
+                  </svg>
+                  <div class="progress-text">
+                    <span class="progress-percent" id="haulPercent">0%</span>
+                    <span class="progress-label">Complete</span>
+                  </div>
+                </div>
+              </div>
+              <div class="haul-details">
+                <div class="haul-stat">
+                  <span class="stat-label">Days Elapsed</span>
+                  <span class="stat-value" id="daysElapsed">0</span>
+                </div>
+                <div class="haul-stat">
+                  <span class="stat-label">Days Remaining</span>
+                  <span class="stat-value" id="daysRemaining">354</span>
+                </div>
+                <div class="haul-stat">
+                  <span class="stat-label">Due Date</span>
+                  <span class="stat-value" id="dueDate">-</span>
+                </div>
+              </div>
+              <div class="haul-message" id="haulMessage"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contribution History Section -->
+        <section class="history-section" id="history">
+          <div class="card">
+            <h2>📜 Contribution History</h2>
+            <p class="section-desc">Track your Zakat payments year-over-year</p>
+
+            <div class="history-chart-container">
+              <canvas id="historyChart"></canvas>
+            </div>
+
+            <div class="history-stats">
+              <div class="stat-card mini">
+                <h4>Total Contributed</h4>
+                <p id="totalContributed">RM 6,150</p>
+              </div>
+              <div class="stat-card mini">
+                <h4>Years Active</h4>
+                <p id="yearsActive">4</p>
+              </div>
+              <div class="stat-card mini">
+                <h4>Growth Rate</h4>
+                <p id="growthRate">+15.2%</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <script src="user-app.js"></script>
-</body>
-
+  </body>
 </html>

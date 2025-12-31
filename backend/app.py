@@ -14,6 +14,17 @@ from database import (
     init_database,
     seed_demo_users,
 )
+
+# Import anonymization utilities
+from anonymization import (
+    anonymize_dataframe,
+    create_anonymized_export,
+    mask_financial_value,
+    get_anonymization_summary,
+)
+
+# Import time-series forecasting
+from time_series_model import get_forecast_data
 from flask import (
     Flask,
     jsonify,
@@ -388,17 +399,74 @@ def check_nisab():
         return jsonify({"error": str(e)}), 400
 
 
+
+
+
+
 @app.route("/api/user/predict", methods=["POST"])
 def predict_zakat_user():
-    """Predicts Zakat amount based on user financial profile."""
+    """Predicts Zakat amount based on user financial profile AND updates profile."""
     if not model:
         return jsonify({"error": "Model not loaded"}), 500
 
     data = request.json
+    
+    # --- PERSISTENCE LOGIC START ---
+    user_id = session.get("user_id")
+    if user_id:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # Check if profile exists
+            cursor.execute("SELECT id FROM user_profiles WHERE user_id = ?", (user_id,))
+            existing = cursor.fetchone()
+            
+            savings = float(data.get("savings", 0) or 0)
+            gold_value = float(data.get("goldValue", 0) or 0)
+            investment_value = float(data.get("investmentValue", 0) or 0)
+            income = float(data.get("income", 0) or 0)
+            age = int(data.get("age", 30) or 30)
+            family_size = int(data.get("familySize", 1) or 1)
+            employment_status = int(data.get("employmentStatus", 1) or 1)
+            contribution_score = int(data.get("previousContributionScore", 50) or 50)
+            
+            if existing:
+                # Update existing profile
+                cursor.execute("""
+                    UPDATE user_profiles SET
+                        age = ?, income = ?, savings = ?, gold_value = ?, 
+                        investment_value = ?, family_size = ?, employment_status = ?, 
+                        contribution_score = ?, updated_at = ?
+                    WHERE user_id = ?
+                """, (
+                    age, income, savings, gold_value, investment_value,
+                    family_size, employment_status, contribution_score, 
+                    datetime.now(), user_id
+                ))
+            else:
+                # Insert new profile
+                cursor.execute("""
+                    INSERT INTO user_profiles 
+                    (user_id, age, income, savings, gold_value, investment_value, 
+                     family_size, employment_status, contribution_score, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    user_id, age, income, savings, gold_value, investment_value,
+                    family_size, employment_status, contribution_score, datetime.now()
+                ))
+            
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error saving user profile: {e}")
+            # Non-blocking error, continue to prediction
+    # --- PERSISTENCE LOGIC END ---
+
     try:
-        savings = data.get("savings", 0)
-        gold_value = data.get("goldValue", 0)
-        investment = data.get("investmentValue", 0)
+        savings = float(data.get("savings", 0) or 0)
+        gold_value = float(data.get("goldValue", 0) or 0)
+        investment = float(data.get("investmentValue", 0) or 0)
         total_wealth = savings + gold_value + investment
 
         if total_wealth < NISAB_THRESHOLD:
@@ -412,14 +480,14 @@ def predict_zakat_user():
             )
 
         features = [
-            data.get("age", 30),
-            data.get("income", 0),
+            float(data.get("age", 30) or 30),
+            float(data.get("income", 0) or 0),
             savings,
             gold_value,
             investment,
-            data.get("familySize", 1),
-            data.get("employmentStatus", 1),
-            data.get("previousContributionScore", 50),
+            float(data.get("familySize", 1) or 1),
+            float(data.get("employmentStatus", 1) or 1),
+            float(data.get("previousContributionScore", 50) or 50),
         ]
 
         features_array = np.array(features).reshape(1, -1)
@@ -694,6 +762,86 @@ def export_data():
         as_attachment=True,
         download_name=f'zakat_data_export_{datetime.now().strftime("%Y%m%d")}.csv',
     )
+
+
+@app.route("/api/admin/export-anonymized", methods=["GET"])
+@admin_required
+def export_anonymized_data():
+    """Export anonymized donor data as CSV - safe for external sharing."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM donors")
+    donors = cursor.fetchall()
+    conn.close()
+
+    df = pd.DataFrame([dict(d) for d in donors])
+    
+    # Apply full anonymization pipeline
+    anon_df = create_anonymized_export(df)
+
+    output = io.StringIO()
+    anon_df.to_csv(output, index=False)
+    output.seek(0)
+
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f'zakat_data_anonymized_{datetime.now().strftime("%Y%m%d")}.csv',
+    )
+
+
+@app.route("/api/admin/anonymization-summary", methods=["GET"])
+@admin_required
+def get_anonymization_info():
+    """Get summary of anonymization applied to the dataset."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM donors")
+    donors = cursor.fetchall()
+    conn.close()
+
+    df = pd.DataFrame([dict(d) for d in donors])
+    
+    # Apply anonymization and get summary
+    anon_df = anonymize_dataframe(df)
+    summary = get_anonymization_summary(anon_df)
+    
+    return jsonify({
+        "summary": summary,
+        "anonymization_techniques": [
+            "SHA-256 hashing for Donor IDs",
+            "K-anonymity through income/wealth bucketing",
+            "Age group generalization",
+            "Data masking for sensitive values"
+        ],
+        "status": "success"
+    })
+
+
+@app.route("/api/admin/time-forecast", methods=["GET"])
+@admin_required
+def get_time_forecast():
+    """Get time-series forecast for Zakat collections."""
+    try:
+        # Get forecast periods from query param, default 12 months
+        periods = request.args.get('periods', 12, type=int)
+        periods = min(max(periods, 1), 36)  # Limit to 1-36 months
+        
+        # Get forecast data
+        forecast_data = get_forecast_data(periods)
+        
+        return jsonify({
+            **forecast_data,
+            "status": "success"
+        })
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "status": "error"
+        }), 500
 
 
 @app.route("/api/data", methods=["GET"])

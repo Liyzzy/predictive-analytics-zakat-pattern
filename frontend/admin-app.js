@@ -243,7 +243,7 @@ function renderTimeSeriesChart(historical, forecast) {
       plugins: {
         legend: {
           position: "top",
-          labels: { color: "#f8fafc" },
+          labels: { color: "#000000ff" },
         },
         tooltip: {
           callbacks: {

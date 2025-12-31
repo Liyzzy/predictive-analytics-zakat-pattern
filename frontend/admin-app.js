@@ -4,6 +4,7 @@ const API_BASE = "/api";
 let forecastChart = null;
 let segmentChart = null;
 let trendChart = null;
+let timeSeriesChart = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   // Set current date
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Setup logout button
   setupLogout();
+  setupScrollSpy();
 });
 
 // Logout function
@@ -53,6 +55,9 @@ function setupEventHandlers() {
 
   // Export button
   document.getElementById("exportBtn").addEventListener("click", exportData);
+  
+  // Anonymized export button
+  document.getElementById("exportAnonBtn").addEventListener("click", exportAnonymizedData);
 
   // Period toggle
   document.querySelectorAll(".toggle-btn").forEach((btn) => {
@@ -74,6 +79,7 @@ async function loadDashboardData() {
   try {
     await Promise.all([
       loadForecast(),
+      loadTimeSeriesForecast(),
       loadSegments(),
       loadTrends("income"),
       loadAtRiskDonors(),
@@ -81,6 +87,180 @@ async function loadDashboardData() {
   } catch (error) {
     console.error("Error loading dashboard data:", error);
   }
+}
+
+// ============== TIME-SERIES FORECASTING ==============
+
+async function loadTimeSeriesForecast() {
+  try {
+    const response = await fetch(`${API_BASE}/admin/time-forecast?periods=12`);
+    const data = await response.json();
+
+    if (data.status !== "success") {
+      console.error("Time-series forecast error:", data.error);
+      return;
+    }
+
+    // Update summary stats
+    document.getElementById("totalHistorical").textContent = formatCurrency(
+      data.summary.total_historical
+    );
+    document.getElementById("avgMonthly").textContent = formatCurrency(
+      data.summary.average_monthly
+    );
+    document.getElementById("forecastTotal").textContent = formatCurrency(
+      data.summary.total_forecast_12m
+    );
+    document.getElementById("yoyGrowth").textContent = 
+      (data.summary.yoy_growth_percent >= 0 ? "+" : "") + 
+      data.summary.yoy_growth_percent + "%";
+
+    // Update model info
+    document.getElementById("modelType").textContent = data.model_info.type;
+    document.getElementById("tsModelInfo").textContent = data.model_info.type;
+
+    // Render time-series chart
+    renderTimeSeriesChart(data.historical, data.forecast);
+  } catch (error) {
+    console.error("Error loading time-series forecast:", error);
+  }
+}
+
+function renderTimeSeriesChart(historical, forecast) {
+  const ctx = document.getElementById("timeSeriesChart").getContext("2d");
+
+  // Prepare labels and data
+  const historicalLabels = historical.map((d) => {
+    const date = new Date(d.date);
+    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  });
+  const historicalValues = historical.map((d) => d.amount);
+
+  const forecastLabels = forecast.map((d) => {
+    const date = new Date(d.date);
+    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  });
+  const forecastValues = forecast.map((d) => d.forecast);
+  const lowerBounds = forecast.map((d) => d.lower_bound);
+  const upperBounds = forecast.map((d) => d.upper_bound);
+
+  // Combine labels
+  const allLabels = [...historicalLabels, ...forecastLabels];
+  
+  // Historical data (null for forecast period)
+  const historicalData = [...historicalValues, ...Array(forecast.length).fill(null)];
+  
+  // Forecast data (null for historical period, with last historical point for continuity)
+  const forecastData = [
+    ...Array(historical.length - 1).fill(null),
+    historicalValues[historicalValues.length - 1],  // Connect to last historical point
+    ...forecastValues
+  ];
+  
+  // Confidence intervals
+  const lowerData = [
+    ...Array(historical.length - 1).fill(null),
+    historicalValues[historicalValues.length - 1],
+    ...lowerBounds
+  ];
+  const upperData = [
+    ...Array(historical.length - 1).fill(null),
+    historicalValues[historicalValues.length - 1],
+    ...upperBounds
+  ];
+
+  if (timeSeriesChart) timeSeriesChart.destroy();
+
+  timeSeriesChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          label: "Historical Collections",
+          data: historicalData,
+          borderColor: "rgba(5, 150, 105, 1)",
+          backgroundColor: "rgba(5, 150, 105, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        },
+        {
+          label: "Forecast",
+          data: forecastData,
+          borderColor: "rgba(234, 179, 8, 1)",
+          backgroundColor: "rgba(234, 179, 8, 0.1)",
+          borderWidth: 3,
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0.3,
+          pointRadius: 3,
+        },
+        {
+          label: "Upper Bound (80% CI)",
+          data: upperData,
+          borderColor: "rgba(234, 179, 8, 0.3)",
+          backgroundColor: "transparent",
+          borderWidth: 1,
+          borderDash: [2, 2],
+          fill: false,
+          tension: 0.3,
+          pointRadius: 0,
+        },
+        {
+          label: "Lower Bound (80% CI)",
+          data: lowerData,
+          borderColor: "rgba(234, 179, 8, 0.3)",
+          backgroundColor: "rgba(234, 179, 8, 0.1)",
+          borderWidth: 1,
+          borderDash: [2, 2],
+          fill: "-1",  // Fill between this and previous dataset
+          tension: 0.3,
+          pointRadius: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: "index",
+      },
+      plugins: {
+        legend: {
+          position: "top",
+          labels: { color: "#f8fafc" },
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              return context.dataset.label + ": " + formatCurrency(context.raw);
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          grid: { color: "rgba(255,255,255,0.1)" },
+          ticks: {
+            color: "#94a3b8",
+            callback: (value) => "RM " + (value / 1000).toFixed(0) + "k",
+          },
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: "#94a3b8",
+            maxRotation: 45,
+            minRotation: 45,
+          },
+        },
+      },
+    },
+  });
 }
 
 async function loadForecast() {
@@ -351,12 +531,12 @@ function analyzeUnderContribution(data, type) {
   const insight = document.getElementById("underContributionInsight");
   if (underContributors.length > 0) {
     insight.innerHTML = `
-            <span class="insight-alert">⚠️ ${underContributors.length} donors</span> 
+            <span class="insight-alert"><i class="ph ph-warning"></i> ${underContributors.length} donors</span> 
             are contributing significantly below the expected 2.5% rate based on their ${type} levels.
         `;
   } else {
     insight.innerHTML = `
-            <span class="insight-positive">✅ Good compliance</span> 
+            <span class="insight-positive"><i class="ph ph-check-circle"></i> Good compliance</span> 
             Most donors are contributing at or above expected levels.
         `;
   }
@@ -415,7 +595,7 @@ function renderRiskTable(donors) {
             }</span></td>
             <td>
                 <span class="risk-level ${riskLevel}">
-                    ${riskLevel === "high" ? "🔴 High Risk" : "🟡 Medium Risk"}
+                    ${riskLevel === "high" ? '<i class="ph ph-warning-octagon"></i> High Risk' : '<i class="ph ph-warning"></i> Medium Risk'}
                 </span>
             </td>
         `;
@@ -442,9 +622,50 @@ async function exportData() {
   }
 }
 
+async function exportAnonymizedData() {
+  try {
+    const btn = document.getElementById("exportAnonBtn");
+    btn.textContent = "⏳ Anonymizing...";
+    btn.disabled = true;
+
+    // Trigger anonymized file download
+    window.location.href = `${API_BASE}/admin/export-anonymized`;
+
+    setTimeout(() => {
+      btn.textContent = "🔒 Export Anonymized";
+      btn.disabled = false;
+    }, 1500);
+  } catch (error) {
+    console.error("Error exporting anonymized data:", error);
+    alert("Error exporting anonymized data");
+  }
+}
+
 function formatCurrency(num) {
   return new Intl.NumberFormat("en-MY", {
     style: "currency",
     currency: "MYR",
   }).format(num);
+}
+
+function setupScrollSpy() {
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-links li a");
+  
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      if (pageYOffset >= sectionTop - 150) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((a) => {
+      a.parentElement.classList.remove("active");
+      if (a.getAttribute("href").includes(current) && current !== "") {
+        a.parentElement.classList.add("active");
+      }
+    });
+  });
 }

@@ -76,12 +76,16 @@ def init_database():
         CREATE TABLE IF NOT EXISTS donors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             donor_id TEXT UNIQUE NOT NULL,
+            anonymized_donor_id TEXT,
             age INTEGER,
+            age_group TEXT,
             income REAL,
+            income_bucket TEXT,
             savings REAL,
             gold_value REAL,
             investment_value REAL,
             total_wealth REAL,
+            wealth_bucket TEXT,
             family_size INTEGER,
             employment_status INTEGER,
             previous_contribution_score INTEGER,
@@ -157,19 +161,24 @@ def import_csv_to_sqlite():
             cursor.execute(
                 """
                 INSERT OR REPLACE INTO donors 
-                (donor_id, age, income, savings, gold_value, investment_value, 
-                 total_wealth, family_size, employment_status, previous_contribution_score,
+                (donor_id, anonymized_donor_id, age, age_group, income, income_bucket,
+                 savings, gold_value, investment_value, total_wealth, wealth_bucket,
+                 family_size, employment_status, previous_contribution_score,
                  last_payment_date, haul_start_date, donor_tier, zakat_amount)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 (
                     row["DonorID"],
+                    row.get("AnonymizedDonorID", ""),
                     row["Age"],
+                    row.get("AgeGroup", ""),
                     row["Income"],
+                    row.get("IncomeBucket", ""),
                     row["Savings"],
                     row["GoldValue"],
                     row["InvestmentValue"],
                     row["TotalWealth"],
+                    row.get("WealthBucket", ""),
                     row["FamilySize"],
                     row["EmploymentStatus"],
                     row["PreviousContributionScore"],

@@ -13,19 +13,55 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fetch Nisab threshold
   fetchNisabThreshold();
 
-  // Setup forms
+  loadUserProfile();
   setupProfileForm();
   setupHaulTracker();
-
-  // Load contribution history
   loadContributionHistory();
-
-  // Real-time wealth calculation
   setupRealTimeWealth();
-
-  // Setup logout button
   setupLogout();
+  setupScrollSpy();
 });
+
+// Load persistent user profile
+async function loadUserProfile() {
+  try {
+    const response = await fetch(`${API_BASE}/user/profile`);
+    
+    if (response.status === 401) {
+       return; // Not logged in
+    }
+    
+    if (response.status === 404) {
+       console.log("No existing profile found. User needs to create one.");
+       return; 
+    }
+
+    const data = await response.json();
+
+    if (data.status === "success" && data.profile) {
+       const p = data.profile;
+       
+       // Populate form fields
+       if(p.income) document.getElementById("income").value = (p.income / 12).toFixed(0); 
+       if(p.age) document.getElementById("age").value = p.age;
+       if(p.savings) document.getElementById("savings").value = p.savings;
+       if(p.gold_value) document.getElementById("goldValue").value = p.gold_value;
+       if(p.investment_value) document.getElementById("investmentValue").value = p.investment_value;
+       if(p.family_size) document.getElementById("familySize").value = p.family_size;
+       if(p.employment_status) document.getElementById("employmentStatus").value = p.employment_status;
+       
+
+
+       // Trigger wealth summary update
+       updateWealthSummary();
+       
+       console.log("User profile loaded successfully");
+       showToast("Welcome back! Your profile has been loaded.", "success");
+    }
+  } catch (error) {
+    console.error("Error loading user profile:", error);
+  }
+}
 
 // Logout function
 function setupLogout() {
@@ -101,9 +137,7 @@ function setupProfileForm() {
       employmentStatus: Number(
         document.getElementById("employmentStatus").value
       ),
-      previousContributionScore: Number(
-        document.getElementById("contributionScore").value
-      ),
+      previousContributionScore: 50, // Default value as UI input removed
     };
 
     const btn = form.querySelector("button");
@@ -132,12 +166,14 @@ function setupProfileForm() {
 
       if (predResult.status === "success") {
         displayPrediction(predResult);
+        showToast("Profile saved & prediction updated successfully!", "success");
       } else {
         console.error("Prediction failed:", predResult.error);
+        showToast("Failed to calculate prediction.", "error");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error connecting to server.");
+      showToast("Error connecting to server.", "error");
     } finally {
       btn.innerText = originalText;
       btn.disabled = false;
@@ -153,7 +189,7 @@ function updateNisabBanner(result) {
     banner.classList.add("eligible");
     banner.classList.remove("not-eligible");
     statusDiv.innerHTML = `
-            <span class="status-icon">✅</span>
+            <span class="status-icon"><i class="ph ph-check-circle"></i></span>
             <span class="status-text">Zakat is <strong>obligatory</strong> - Your wealth (${formatCurrency(
               result.total_wealth
             )}) exceeds the Nisab threshold</span>
@@ -162,7 +198,7 @@ function updateNisabBanner(result) {
     banner.classList.add("not-eligible");
     banner.classList.remove("eligible");
     statusDiv.innerHTML = `
-            <span class="status-icon">ℹ️</span>
+            <span class="status-icon"><i class="ph ph-info"></i></span>
             <span class="status-text">Zakat is <strong>not obligatory</strong> - Your wealth (${formatCurrency(
               result.total_wealth
             )}) is below the Nisab threshold</span>
@@ -225,7 +261,7 @@ function displayHaulStatus(result) {
     document.getElementById("dueDate").textContent = "NOW";
     document.getElementById("haulMessage").innerHTML = `
             <div class="haul-due">
-                <span class="due-icon">⚠️</span>
+                <span class="due-icon"><i class="ph ph-warning"></i></span>
                 ${result.message}
             </div>
         `;
@@ -244,7 +280,7 @@ function displayHaulStatus(result) {
     );
     document.getElementById("haulMessage").innerHTML = `
             <div class="haul-pending">
-                <span class="pending-icon">📆</span>
+                <span class="pending-icon"><i class="ph ph-calendar"></i></span>
                 Your Zakat will be due on ${formatDate(result.due_date)}
             </div>
         `;
@@ -356,5 +392,50 @@ function formatDate(dateStr) {
     year: "numeric",
     month: "long",
     day: "numeric",
+  });
+}
+
+function showToast(message, type = "success") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  
+  const icon = type === "success" ? '<i class="ph ph-check-circle"></i>' : '<i class="ph ph-x-circle"></i>';
+  
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  // Remove after animation (3 seconds total)
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+function setupScrollSpy() {
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-links li a");
+  
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (pageYOffset >= sectionTop - 150) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((a) => {
+      a.parentElement.classList.remove("active");
+      if (a.getAttribute("href").includes(current) && current !== "") {
+        a.parentElement.classList.add("active");
+      }
+    });
   });
 }

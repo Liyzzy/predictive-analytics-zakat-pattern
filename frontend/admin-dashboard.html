@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- CSS -->
@@ -30,7 +32,7 @@
                 <li><a href="#trends">Wealth Trends</a></li>
                 <li><a href="#risk">At-Risk Donors</a></li>
                 <li class="nav-divider"></li>
-                <li><a href="#" class="nav-logout" id="logoutBtn">🚪 Logout</a></li>
+                <li><a href="#" class="nav-logout" id="logoutBtn"><i class="ph ph-sign-out"></i> Logout</a></li>
             </ul>
         </nav>
 
@@ -42,8 +44,9 @@
                     <p class="date-display" id="currentDate">loading...</p>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-secondary" id="refreshData">🔄 Refresh Data</button>
-                    <button class="btn-export" id="exportBtn">📥 Export CSV</button>
+                    <button class="btn-secondary" id="refreshData"><i class="ph ph-arrows-clockwise"></i> Refresh Data</button>
+                    <button class="btn-export" id="exportBtn"><i class="ph ph-download-simple"></i> Export CSV</button>
+                    <button class="btn-export anonymized" id="exportAnonBtn"><i class="ph ph-shield-check"></i> Export Anonymized</button>
                 </div>
             </header>
 
@@ -75,7 +78,7 @@
             <section class="forecast-section" id="forecast">
                 <div class="card">
                     <div class="section-header">
-                        <h2>📊 Collection Forecasting</h2>
+                        <h2><i class="ph ph-chart-line-up"></i> Collection Forecasting</h2>
                         <div class="period-toggle">
                             <button class="toggle-btn active" data-period="monthly">Monthly</button>
                             <button class="toggle-btn" data-period="quarterly">Quarterly</button>
@@ -105,11 +108,53 @@
                 </div>
             </section>
 
+            <!-- Time-Series Forecast Section (NEW) -->
+            <section class="timeseries-section" id="timeseries">
+                <div class="card">
+                    <div class="section-header">
+                        <h2><i class="ph ph-timer"></i> Time-Series Forecast (Prophet ML)</h2>
+                        <div class="model-badge">
+                            <span id="modelType">Prophet</span>
+                        </div>
+                    </div>
+                    <p class="section-desc">Historical trend analysis with 12-month forecast using time-series machine learning</p>
+
+                    <div class="timeseries-chart-container">
+                        <canvas id="timeSeriesChart"></canvas>
+                    </div>
+
+                    <div class="timeseries-stats">
+                        <div class="ts-stat-card">
+                            <h4>Total Historical</h4>
+                            <p class="ts-value" id="totalHistorical">RM 0</p>
+                        </div>
+                        <div class="ts-stat-card">
+                            <h4>Avg Monthly</h4>
+                            <p class="ts-value" id="avgMonthly">RM 0</p>
+                        </div>
+                        <div class="ts-stat-card">
+                            <h4>12-Month Forecast</h4>
+                            <p class="ts-value" id="forecastTotal">RM 0</p>
+                        </div>
+                        <div class="ts-stat-card highlight">
+                            <h4>YoY Growth</h4>
+                            <p class="ts-value" id="yoyGrowth">+0%</p>
+                        </div>
+                    </div>
+
+                    <div class="timeseries-info">
+                        <p><strong>Model:</strong> <span id="tsModelInfo">Facebook Prophet</span></p>
+                        <p><strong>Seasonality:</strong> Yearly + Ramadan Cycle</p>
+                        <p><strong>Confidence Level:</strong> 80%</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Donor Segmentation Section -->
             <section class="segments-section" id="segments">
                 <div class="cards-row">
                     <div class="card">
-                        <h2>👥 Donor Segmentation</h2>
+                        <h2><i class="ph ph-users-three"></i> Donor Segmentation</h2>
                         <p class="section-desc">Classification by contribution capacity</p>
 
                         <div class="segment-chart-container">
@@ -118,7 +163,7 @@
                     </div>
 
                     <div class="card">
-                        <h2>📈 Segment Analysis</h2>
+                        <h2><i class="ph ph-table"></i> Segment Analysis</h2>
                         <p class="section-desc">Detailed breakdown by tier</p>
 
                         <div class="segment-table-container">
@@ -143,7 +188,7 @@
             <!-- Wealth Trend Analysis Section -->
             <section class="trends-section" id="trends">
                 <div class="card">
-                    <h2>📉 Wealth Trend Analysis</h2>
+                    <h2><i class="ph ph-trend-down"></i> Wealth Trend Analysis</h2>
                     <p class="section-desc">Correlating income levels with Zakat contributions</p>
 
                     <div class="trend-controls">
@@ -170,7 +215,7 @@
             <section class="risk-section" id="risk">
                 <div class="card">
                     <div class="section-header">
-                        <h2>⚠️ Risk Identification</h2>
+                        <h2><i class="ph ph-siren"></i> Risk Identification</h2>
                         <span class="risk-badge" id="riskBadge">0 donors flagged</span>
                     </div>
                     <p class="section-desc">High-income individuals with no recent payment history requiring

@@ -15,6 +15,8 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- CSS -->
@@ -35,7 +37,7 @@
           <li><a href="#haul">Haul Tracker</a></li>
           <li><a href="#history">Contribution History</a></li>
           <li class="nav-divider"></li>
-          <li><a href="#" class="nav-logout" id="logoutBtn">🚪 Logout</a></li>
+          <li><a href="#" class="nav-logout" id="logoutBtn"><i class="ph ph-sign-out"></i> Logout</a></li>
         </ul>
       </nav>
 
@@ -50,7 +52,7 @@
         <section class="nisab-banner" id="nisabBanner">
           <div class="nisab-content">
             <div class="nisab-status" id="nisabStatus">
-              <span class="status-icon">⏳</span>
+              <span class="status-icon"><i class="ph ph-hourglass"></i></span>
               <span class="status-text"
                 >Enter your financial details to check Zakat eligibility</span
               >
@@ -64,7 +66,7 @@
         <!-- Financial Profiling Section -->
         <section class="profile-section" id="profiling">
           <div class="card">
-            <h2>📊 Financial Profiling</h2>
+            <h2><i class="ph ph-chart-bar"></i> Financial Profiling</h2>
             <p class="section-desc">
               Enter your current financial information for Zakat assessment
             </p>
@@ -96,7 +98,7 @@
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>💵 Cash Savings (RM)</label>
+                  <label><i class="ph ph-money"></i> Cash Savings (RM)</label>
                   <input
                     type="number"
                     id="savings"
@@ -106,7 +108,7 @@
                   />
                 </div>
                 <div class="form-group">
-                  <label>🥇 Gold Assets Value (RM)</label>
+                  <label><i class="ph ph-coins"></i> Gold Assets Value (RM)</label>
                   <input
                     type="number"
                     id="goldValue"
@@ -119,7 +121,7 @@
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>📈 Investment Portfolios (RM)</label>
+                  <label><i class="ph ph-trend-up"></i> Investment Portfolios (RM)</label>
                   <input
                     type="number"
                     id="investmentValue"
@@ -129,7 +131,7 @@
                   />
                 </div>
                 <div class="form-group">
-                  <label>👨‍👩‍👧‍👦 Family Size</label>
+                  <label><i class="ph ph-users"></i> Family Size</label>
                   <input
                     type="number"
                     id="familySize"
@@ -150,18 +152,7 @@
                     <option value="2">Self-Employed</option>
                   </select>
                 </div>
-                <div class="form-group">
-                  <label>Contribution Consistency (0-100)</label>
-                  <input
-                    type="range"
-                    id="contributionScore"
-                    min="0"
-                    max="100"
-                    value="50"
-                    oninput="this.nextElementSibling.value = this.value"
-                  />
-                  <output>50</output>
-                </div>
+
               </div>
 
               <button type="submit" class="btn-primary">
@@ -172,7 +163,7 @@
 
           <!-- Wealth Summary Card -->
           <div class="wealth-summary card" id="wealthSummary">
-            <h3>💰 Total Zakatable Wealth</h3>
+            <h3><i class="ph ph-wallet"></i> Total Zakatable Wealth</h3>
             <div class="wealth-amount" id="totalWealth">RM 0</div>
             <div class="wealth-breakdown">
               <div class="breakdown-item">
@@ -195,14 +186,14 @@
         <section class="prediction-section" id="prediction">
           <div class="card prediction-card">
             <div class="prediction-content">
-              <h2>🎯 Predictive Zakat Recommendation</h2>
+              <h2><i class="ph ph-target"></i> Predictive Zakat Recommendation</h2>
               <p class="section-desc">
                 AI-powered recommendation based on your financial profile and
                 spending patterns
               </p>
 
               <div id="predictionPlaceholder" class="prediction-placeholder">
-                <div class="placeholder-icon">🔮</div>
+                <div class="placeholder-icon"><i class="ph ph-crystal-ball"></i></div>
                 <p>
                   Complete your financial profile above to receive a
                   personalized Zakat prediction
@@ -316,6 +307,9 @@
         </section>
       </main>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <script src="user-app.js"></script>
   </body>

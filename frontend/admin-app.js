@@ -55,9 +55,11 @@ function setupEventHandlers() {
 
   // Export button
   document.getElementById("exportBtn").addEventListener("click", exportData);
-  
+
   // Anonymized export button
-  document.getElementById("exportAnonBtn").addEventListener("click", exportAnonymizedData);
+  document
+    .getElementById("exportAnonBtn")
+    .addEventListener("click", exportAnonymizedData);
 
   // Period toggle
   document.querySelectorAll(".toggle-btn").forEach((btn) => {
@@ -111,9 +113,10 @@ async function loadTimeSeriesForecast() {
     document.getElementById("forecastTotal").textContent = formatCurrency(
       data.summary.total_forecast_12m
     );
-    document.getElementById("yoyGrowth").textContent = 
-      (data.summary.yoy_growth_percent >= 0 ? "+" : "") + 
-      data.summary.yoy_growth_percent + "%";
+    document.getElementById("yoyGrowth").textContent =
+      (data.summary.yoy_growth_percent >= 0 ? "+" : "") +
+      data.summary.yoy_growth_percent +
+      "%";
 
     // Update model info
     document.getElementById("modelType").textContent = data.model_info.type;
@@ -132,13 +135,19 @@ function renderTimeSeriesChart(historical, forecast) {
   // Prepare labels and data
   const historicalLabels = historical.map((d) => {
     const date = new Date(d.date);
-    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      year: "2-digit",
+    });
   });
   const historicalValues = historical.map((d) => d.amount);
 
   const forecastLabels = forecast.map((d) => {
     const date = new Date(d.date);
-    return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      year: "2-digit",
+    });
   });
   const forecastValues = forecast.map((d) => d.forecast);
   const lowerBounds = forecast.map((d) => d.lower_bound);
@@ -146,27 +155,30 @@ function renderTimeSeriesChart(historical, forecast) {
 
   // Combine labels
   const allLabels = [...historicalLabels, ...forecastLabels];
-  
+
   // Historical data (null for forecast period)
-  const historicalData = [...historicalValues, ...Array(forecast.length).fill(null)];
-  
+  const historicalData = [
+    ...historicalValues,
+    ...Array(forecast.length).fill(null),
+  ];
+
   // Forecast data (null for historical period, with last historical point for continuity)
   const forecastData = [
     ...Array(historical.length - 1).fill(null),
-    historicalValues[historicalValues.length - 1],  // Connect to last historical point
-    ...forecastValues
+    historicalValues[historicalValues.length - 1], // Connect to last historical point
+    ...forecastValues,
   ];
-  
+
   // Confidence intervals
   const lowerData = [
     ...Array(historical.length - 1).fill(null),
     historicalValues[historicalValues.length - 1],
-    ...lowerBounds
+    ...lowerBounds,
   ];
   const upperData = [
     ...Array(historical.length - 1).fill(null),
     historicalValues[historicalValues.length - 1],
-    ...upperBounds
+    ...upperBounds,
   ];
 
   if (timeSeriesChart) timeSeriesChart.destroy();
@@ -215,7 +227,7 @@ function renderTimeSeriesChart(historical, forecast) {
           backgroundColor: "rgba(234, 179, 8, 0.1)",
           borderWidth: 1,
           borderDash: [2, 2],
-          fill: "-1",  // Fill between this and previous dataset
+          fill: "-1", // Fill between this and previous dataset
           tension: 0.3,
           pointRadius: 0,
         },
@@ -403,7 +415,7 @@ function renderSegmentChart(tierCounts) {
       plugins: {
         legend: {
           position: "bottom",
-          labels: { color: "#f8fafc" },
+          labels: { color: "#000000ff" },
         },
       },
     },
@@ -491,7 +503,7 @@ function renderTrendChart(scatterData, type) {
       plugins: {
         legend: {
           position: "top",
-          labels: { color: "#f8fafc" },
+          labels: { color: "#000000ff" },
         },
       },
       scales: {
@@ -595,7 +607,11 @@ function renderRiskTable(donors) {
             }</span></td>
             <td>
                 <span class="risk-level ${riskLevel}">
-                    ${riskLevel === "high" ? '<i class="ph ph-warning-octagon"></i> High Risk' : '<i class="ph ph-warning"></i> Medium Risk'}
+                    ${
+                      riskLevel === "high"
+                        ? '<i class="ph ph-warning-octagon"></i> High Risk'
+                        : '<i class="ph ph-warning"></i> Medium Risk'
+                    }
                 </span>
             </td>
         `;
@@ -651,7 +667,7 @@ function formatCurrency(num) {
 function setupScrollSpy() {
   const sections = document.querySelectorAll("section[id]");
   const navLinks = document.querySelectorAll(".nav-links li a");
-  
+
   window.addEventListener("scroll", () => {
     let current = "";
     sections.forEach((section) => {

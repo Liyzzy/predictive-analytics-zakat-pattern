@@ -3,6 +3,16 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 
+# Import anonymization utilities
+from anonymization import (
+    anonymize_donor_id,
+    bucket_income,
+    bucket_wealth,
+    bucket_age,
+    preprocess_for_ml,
+    get_anonymization_summary
+)
+
 def generate_mock_data(num_samples=500):
     """
     Generates synthetic data for Zakat analytics.
@@ -83,14 +93,22 @@ def generate_mock_data(num_samples=500):
         else:
             zakat_amount = 0
 
+        # Generate donor ID and anonymized version
+        donor_id = f"MZ{1000 + i}"
+        anonymized_id = anonymize_donor_id(donor_id)
+        
         data.append({
-            "DonorID": f"MZ{1000 + i}",
+            "DonorID": donor_id,
+            "AnonymizedDonorID": anonymized_id,
             "Age": age,
+            "AgeGroup": bucket_age(age),
             "Income": int(income),
+            "IncomeBucket": bucket_income(income),
             "Savings": int(savings),
             "GoldValue": int(gold_value),
             "InvestmentValue": int(investment),
             "TotalWealth": int(total_wealth),
+            "WealthBucket": bucket_wealth(total_wealth),
             "FamilySize": family_size,
             "EmploymentStatus": employment,
             "PreviousContributionScore": prev_history,
@@ -101,14 +119,39 @@ def generate_mock_data(num_samples=500):
         })
 
     df = pd.DataFrame(data)
-    # Save to CSV
+    
+    # Apply preprocessing for ML
+    df_preprocessed = preprocess_for_ml(df)
+    
+    # Save full dataset (with original IDs - internal use only)
     output_path = "mock_zakat_data.csv"
     df.to_csv(output_path, index=False)
     print(f"Successfully generated {num_samples} records in {output_path}")
-    print(df.head())
+    
+    # Save anonymized dataset (safe for sharing)
+    anonymized_columns = [
+        'AnonymizedDonorID', 'AgeGroup', 'IncomeBucket', 'WealthBucket',
+        'FamilySize', 'EmploymentStatus', 'DonorTier', 'ZakatAmount'
+    ]
+    df_anonymized = df[anonymized_columns]
+    df_anonymized.to_csv("mock_zakat_data_anonymized.csv", index=False)
+    print(f"Also saved anonymized version: mock_zakat_data_anonymized.csv")
+    
+    # Print summary
+    print(f"\n{'='*50}")
+    print("DATA GENERATION SUMMARY")
+    print(f"{'='*50}")
+    print(df[['DonorID', 'AnonymizedDonorID', 'Income', 'IncomeBucket']].head())
     print(f"\nDonor Tier Distribution:")
     print(df['DonorTier'].value_counts())
+    print(f"\nIncome Bucket Distribution:")
+    print(df['IncomeBucket'].value_counts())
     print(f"\nAt-Risk Donors (no payment in 400+ days): {len(df[df['LastPaymentDate'] < (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d')])}")
+    
+    # Print anonymization summary
+    summary = get_anonymization_summary(df)
+    print(f"\nAnonymization Summary: {summary}")
+
 
 if __name__ == "__main__":
     generate_mock_data()

@@ -13,6 +13,7 @@ venv/
 data/
 *.csv
 *.pkl
+*.db
 
 # Frontend
 node_modules/
